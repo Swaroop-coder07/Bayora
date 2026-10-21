@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: bayora
+      POSTGRES_PASSWORD: bayora
+      POSTGRES_DB: bayora
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bayora"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    image: bayora-backend          # also used as the sandbox image when DOCKER_ENABLED=true
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://bayora:bayora@db:5432/bayora
+      AUDIT_LOG_DIR: /app/audit_logs
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - auditlogs:/app/audit_logs
+      # To use real per-test containers, set DOCKER_ENABLED=true in .env and uncomment:
+      # - /var/run/docker.sock:/var/run/docker.sock   (grants the backend control of the host Docker - understand the risk)
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+volumes:
+  pgdata:
+  auditlogs:

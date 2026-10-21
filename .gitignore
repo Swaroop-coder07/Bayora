@@ -1,0 +1,23 @@
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Frontend
+node_modules/
+dist/
+build/
+
+# Local data and logs
+*.sqlite3
+*.db
+audit_logs/
+*.log
+
