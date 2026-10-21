@@ -62,16 +62,4 @@ Request flow (`services/referee.py`): prompt -> leakage budget -> sandbox -> out
 * **Blue Team:** configuration (system prompt, topics, guardrails, canaries), acknowledge alerts, export records, full audit log.
 * **Red Team:** run tests, see only their own runs. After the leakage budget is nearly spent they receive a coarse SAFE/UNSAFE verdict only.
 
-## Tests
-```bash
-cd backend && python -m unittest discover -s app/tests -t . -v     # or: pytest
-```
-Covers budget escalation, canary matching/masking, guard verdicts, tamper detection, audit chain and a real sandbox run.
 
-## Limits (read before claiming more than the code does)
-* **Verification proves recorded data was not altered. It does not prove the model output is reproducible or deterministic.**
-* **Isolation is process/container level.** Each test runs in a new process (or `--rm` container) and its temp directory is deleted and checked. This does not defend against hardware side channels (shared KV-cache, cache timing); see "Future scope" in the pitch.
-* A UI status saying "cleaned" is backed by recorded results: fresh-context hash check per run, cleanup check per session, and the self-test. It is still not a formal proof.
-* `DOCKER_ENABLED=true` inside Compose needs the Docker socket mounted, which gives the backend control over the host Docker. Use a dedicated runner host in production.
-* Seed passwords and the default `SECRET_KEY` are for development only.
-* Similarity is lexical in the MVP; determined attackers can paraphrase around it. Embeddings are the planned upgrade.
